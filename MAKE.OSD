@@ -1,0 +1,46 @@
+.SUFFIXES:
+.SUFFIXES:	.c .asm .obj .def .lrf .exe
+
+OS2INC = /bin/c5/lib
+BENINC = ../tvinc
+CFLAGS = -c -G2 -Ziep -Od -D LINT_ARGS -D DEBUG -I$(BENINC) -I$(OS2INC)
+AFLAGS = -Mx -t
+OBJS = test.obj \
+data.obj help.obj image.obj menu.obj option.obj screen.obj vars.obj
+
+
+# ***** Rules
+
+.c.obj:
+	cl $(CFLAGS) $*.c
+
+.asm.obj:
+	masm $(AFLAGS) $*.asm;
+
+
+# ***** LINK step
+
+#   OS/2 DEBUG version
+psd.exe: ps.obj $(OBJS) psd.lrf psd.def
+	link ps.obj /co /map /stack:8192 @psd.lrf
+
+
+# ***** Dependencies
+
+test.obj:	test.asm getstat.inc
+
+ps.obj: 	ps.c ps.h vars.h $(BENINC)/vio.h $(OS2INC)/doscalls.h
+
+option.obj:	option.c ps.h vars.h $(BENINC)/vio.h
+
+vars.obj:	vars.c ps.h vars.h $(BENINC)/vio.h
+
+menu.obj:	menu.c ps.h vars.h $(BENINC)/vio.h $(OS2INC)/doscalls.h
+
+help.obj:	help.c ps.h vars.h $(BENINC)/vio.h
+
+screen.obj:	screen.c ps.h vars.h $(BENINC)/vio.h
+
+data.obj:	data.c data.h getstat.h ps.h vars.h
+
+image.obj:	image.c data.h ps.h vars.h

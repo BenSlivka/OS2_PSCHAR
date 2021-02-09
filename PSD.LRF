@@ -1,0 +1,11 @@
+test.obj +
+ps.obj data.obj help.obj image.obj menu.obj option.obj screen.obj vars.obj
+psd.exe
+psd.map
+doscalls.lib +
+slibc5.lib   +
+slibc.lib    +
+em.lib	     +
+slibfa.lib   +
+slibfp.lib
+psd.def

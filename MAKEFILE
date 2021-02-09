@@ -1,0 +1,76 @@
+.SUFFIXES:
+.SUFFIXES: .exe .obj .def .lrf .h .inc .c .asm
+
+#   GCFLAGS may be defined to control generation of additional code
+#
+#   Flag	    Function
+#   -----	    ------------------------------------------------
+#   CheckAsserts    Enables assertion code
+#   DEBUG	    Enables debugging code
+#   PROFILE	    Enables callouts to PROFILE.DLL
+#
+#   Example:	make GCFLAGS="-DCheckAsserts -DDEBUG -DPROFILE"
+#
+#
+#   GLFLAGS may be defined to add Global Linker flags
+#
+#   Example:	make GLFLAGS="/co"
+
+
+OS2INC = $(INCLUDE)
+PRFINC = ../profile
+CFLAGS = -c -AS -Lp -G2s -Zep -DLINT_ARGS -I$(OS2INC) -I$(PRFINC) $(GCFLAGS)
+AFLAGS = -Mx -t $(GAFLAGS)
+LFLAGS = /map /stack:6000 $(GLFLAGS)
+
+OBJS = asrt.obj data.obj fmt.obj help.obj image.obj menu.obj option.obj \
+ps.obj queue.obj screen.obj vars.obj
+
+
+# ***** Rules
+
+.c.obj:
+	cl $(CFLAGS) $(GCFLAGS) $*.c
+
+.asm.obj:
+	masm $(AFLAGS) $*.asm;
+
+.obj.exe:
+	link $(LFLAGS) @$*.lrf
+
+# ***** Dependencies
+
+all:	ps.exe ps.sym
+
+ps.sym: ps.map
+	mapsym ps
+
+ps.exe ps.map: $(OBJS) ps.lrf ps.def $(PRFINC)/profile.lib
+
+
+asrt.obj asrt.lst:	asrt.c $(OS2INC)\doscalls.h asrt.h
+
+data.obj data.lst:	data.c data.h $(OS2INC)\infoseg.h procstat.h \
+			vars.h ps.h vio.h asrt.h
+
+fmt.obj  fmt.lst:	fmt.asm dispatch.inc dosmac.inc
+
+help.obj help.lst:	help.c vars.h ps.h queue.h os2.h vio.h asrt.h
+
+image.obj image.lst:	image.c procstat.h data.h vars.h ps.h vio.h asrt.h
+
+menu.obj menu.lst:	menu.c $(OS2INC)\doscalls.h vars.h queue.h os2.h ps.h \
+			vio.h asrt.h
+
+option.obj option.lst:	option.c vars.h vio.h queue.h os2.h ps.h asrt.h
+
+ps.obj ps.lst:		ps.c $(OS2INC)\subcalls.h $(OS2INC)\doscalls.h \
+			queue.h $(PRFINC)\profile.h os2.h vars.h vio.h ps.h \
+			asrt.h
+
+queue.obj queue.lst:	queue.c $(OS2INC)\doscalls.h queue.h os2.h vio.h asrt.h
+
+screen.obj screen.lst:	screen.c $(OS2INC)\doscalls.h vars.h ps.h vio.h \
+			asrt.h
+
+vars.obj vars.lst:	vars.c queue.h os2.h ps.h vio.h asrt.h
